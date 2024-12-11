@@ -20,24 +20,42 @@ def open_page():
     driver = setup_driver()
     driver.get(url)
 
-    # Hacer clic en el header de "Por parte"
-    click_por_parte(driver)
+    click_header(driver)
+
+    fill_form_fields(driver)
 
     time.sleep(5)
 
     driver.quit()
 
 
-# Funcion para cambiar a por parte
-def click_por_parte(driver):
+# Función para cambiar a "Por parte"
+def click_header(driver):
     try:
         por_parte_tab = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "formPublica:porParte:header:inactive"))
         )
         por_parte_tab.click()
-        print('Haciendo clic en "Por parte"...')
     except Exception as e:
-        print(f"Error al intentar hacer clic en 'Por parte': {e}")
+        print(f"Error al intentar hacer clic en header: {e}")
+
+
+# Función para completar los campos Jurisdicción y "Parte
+def fill_form_fields(driver):
+    try:
+        camara_partes_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "formPublica:camaraPartes"))
+        )
+        camara_partes_input.send_keys("COM")
+
+        nom_interv_parte_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "formPublica:nomIntervParte"))
+        )
+        nom_interv_parte_input.send_keys("RESIDUOS")
+
+        print('Campos completados: "Jurisdicción" y "Parte"')
+    except Exception as e:
+        print(f"Error al intentar completar los campos: {e}")
 
 
 # Ejecutar el script
