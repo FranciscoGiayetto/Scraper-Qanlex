@@ -1,17 +1,18 @@
 import time
 from config import setup_driver
-from page_interaction import *
-
+from page_interaction import click_header,fill_form_fields,click_search_button,go_to_next_page,click_buttons_in_table
+from create_database import create_database_and_tables
 
 # Función para interactuar con la página
 def open_page():
+    create_database_and_tables()
     url = "http://scw.pjn.gov.ar/scw/home.seam"
     driver = setup_driver()
     driver.get(url)
 
     click_header(driver)
     fill_form_fields(driver)
-    time.sleep(5)  # Pausa para el captcha
+    time.sleep(10)  # Pausa para el captcha
     click_search_button(driver)
     time.sleep(5)
 
