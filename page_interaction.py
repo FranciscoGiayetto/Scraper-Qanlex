@@ -2,6 +2,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from data_extraction import *
+from database_insertion import *
+import pymysql
+from config import DATABASE_CONFIG
 
 
 # Función para cambiar a "Por parte"
@@ -46,6 +49,7 @@ def click_search_button(driver):
 # Ingresar en cada expediente
 def click_buttons_in_table(driver, processed_rows):
     try:
+        # Reobtén las filas de la tabla en cada iteración
         rows = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table tr"))
         )
@@ -53,48 +57,42 @@ def click_buttons_in_table(driver, processed_rows):
         if not rows:
             return False
 
-        processed_rows = 0
-        for row_index in range(len(rows)):
+        for row_index, row in enumerate(rows):
             if row_index in processed_rows:
                 continue
 
             try:
+
+                # Vuelve a obtener las filas para evitar referencias obsoletas
                 rows = WebDriverWait(driver, 10).until(
                     EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table tr"))
                 )
-
                 row = rows[row_index]
+
                 buttons = row.find_elements(
                     By.CSS_SELECTOR, "a.btn.btn-default.btn-sm.no-margin"
                 )
-
                 if buttons:
                     button = buttons[0]
-
                     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(button))
                     button.click()
+
+                    # Extracción de datos
                     notes = extract_notes(driver)
                     actions = extract_actions(driver)
                     details = extract_details(driver)
                     participants = extract_participants(driver)
                     resources = extract_resources(driver)
 
-                    full_data = {
-                        "details": details,
-                        "participants": participants,
-                        "actions": actions,
-                        "resources": resources,
-                        "notes": notes,
-                    }
+                    connection = pymysql.connect(**DATABASE_CONFIG)
 
-                    # Guardar en el archivo JSON
-                    with open("datos.json", "a", encoding="utf-8") as f:
-                        import json
-
-                        f.write(
-                            json.dumps(full_data, ensure_ascii=False, indent=4) + "\n"
-                        )
-
+                    # # Insertar datos en la base de datos
+                    details_id = insert_details(connection, details)
+                    insert_participants(connection, participants, details_id)
+                    insert_actions(connection, actions, details_id)
+                    insert_notes(connection, notes, details_id)
+                    
+                    # Volver a la tabla
                     back_button = WebDriverWait(driver, 10).until(
                         EC.element_to_be_clickable(
                             (By.CLASS_NAME, "btn.btn-default.bg-info")
@@ -102,6 +100,7 @@ def click_buttons_in_table(driver, processed_rows):
                     )
                     back_button.click()
 
+                    # Esperar a que la tabla se recargue
                     WebDriverWait(driver, 10).until(
                         EC.presence_of_all_elements_located(
                             (By.CSS_SELECTOR, "table tr")
@@ -109,22 +108,17 @@ def click_buttons_in_table(driver, processed_rows):
                     )
 
                     processed_rows.add(row_index)
-                    processed_rows += 1
                 else:
                     processed_rows.add(row_index)
 
             except Exception as e:
-                print(
-                    f"Error al intentar hacer clic en un botón en la fila {row_index+1}: {e}"
-                )
+                print(f"Error en la fila {row_index + 1}: {e}")
                 continue
 
-        if processed_rows == 0:
-            return False
-        return True
+        return 
 
     except Exception as e:
-        print(f"Error al intentar hacer clic en los botones: {e}")
+        print(f"Error al procesar la tabla: {e}")
         return False
 
 
