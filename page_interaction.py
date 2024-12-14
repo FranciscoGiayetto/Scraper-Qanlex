@@ -57,6 +57,8 @@ def click_buttons_in_table(driver, processed_rows):
         if not rows:
             return False
 
+        connection = pymysql.connect(**DATABASE_CONFIG)
+
         for row_index, row in enumerate(rows):
             if row_index in processed_rows:
                 continue
@@ -84,13 +86,11 @@ def click_buttons_in_table(driver, processed_rows):
                     participants = extract_participants(driver)
                     resources = extract_resources(driver)
 
-                    connection = pymysql.connect(**DATABASE_CONFIG)
-
-                    # # Insertar datos en la base de datos
+                    # # # Insertar datos en la base de datos
                     details_id = insert_details(connection, details)
                     insert_participants(connection, participants, details_id)
                     insert_actions(connection, actions, details_id)
-                    insert_notes(connection, notes, details_id)
+                    # insert_notes(connection, notes, details_id)
                     
                     # Volver a la tabla
                     back_button = WebDriverWait(driver, 10).until(
