@@ -12,9 +12,8 @@ def open_page():
 
     click_header(driver)
     fill_form_fields(driver)
-    time.sleep(10)  # Pausa para el captcha
+    time.sleep(20)  # Pausa para el captcha
     click_search_button(driver)
-    time.sleep(5)
 
     processed_rows = set()
     end = True
