@@ -2,103 +2,69 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
+# saque la fecha
 # Extraer datos de las notas
 def extract_notes(driver):
     try:
         notes = []
-
-        table = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located(
-                (By.XPATH, "//table/thead//th[contains(text(),'FECHA')]")
-            )
-        )
-        rows = driver.find_elements(By.XPATH, ".//tbody/tr")
-
-        for row in rows:
-            cells = row.find_elements(By.TAG_NAME, "td")
-
-            if len(cells) >= 3:
-                fecha = cells[0].text.strip() if len(cells) > 0 else ""
-                interviniente = cells[1].text.strip() if len(cells) > 1 else ""
-                descripcion = cells[2].text.strip() if len(cells) > 2 else ""
-
-                notes.append(
-                    {
-                        "fecha": fecha,
-                        "interviniente": interviniente,
-                        "descripcion": descripcion,
-                    }
+        if len(driver.find_elements(By.ID, "expediente:tableNotas")) > 0:
+            table = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.ID, "expediente:tableNotas")
                 )
+            )
+            rows = driver.find_elements(By.XPATH, ".//tbody/tr")
 
-        return notes
+            for row in rows:
+                cells = row.find_elements(By.TAG_NAME, "td")
+
+                if len(cells) >= 3:
+                    #fecha = cells[0].text.strip() if len(cells) > 0 else ""
+                    interviniente = cells[1].text.strip() if len(cells) > 1 else ""
+                    descripcion = cells[2].text.strip() if len(cells) > 2 else ""
+                    fecha = cells[0].text.strip() if len(cells) > 0 else ""
+                    notes.append(
+                        {
+                            "fecha": fecha,
+                            "interviniente": interviniente,
+                            "descripcion": descripcion,
+                        }
+                    )
+
+            return notes
+        else:
+            print('No hay notas')
+            return []
 
     except Exception as e:
         print(f"Error al extraer notas: {e}")
         return None
 
-
-# Extraer datos generales
 def extract_details(driver):
     try:
         details = {}
 
-        department = (
-            WebDriverWait(driver, 10)
-            .until(
-                EC.presence_of_element_located(
-                    (By.ID, "expediente:j_idt90:detailDependencia")
-                )
-            )
-            .text
-        )
-        details["dependencia"] = department
+        if len(driver.find_elements(By.ID, "expediente:j_idt90:detailDependencia")) > 0:
+            department = driver.find_element(By.ID, "expediente:j_idt90:detailDependencia").text
+            details["dependencia"] = department
 
-        jurisdiction = (
-            WebDriverWait(driver, 10)
-            .until(
-                EC.presence_of_element_located(
-                    (By.ID, "expediente:j_idt90:detailCamera")
-                )
-            )
-            .text
-        )
-        details["jurisdiccion"] = jurisdiction
+        if len(driver.find_elements(By.ID, "expediente:j_idt90:detailCamera")) > 0:
+            jurisdiction = driver.find_element(By.ID, "expediente:j_idt90:detailCamera").text
+            details["jurisdiccion"] = jurisdiction
 
-        current_situation = (
-            WebDriverWait(driver, 10)
-            .until(
-                EC.presence_of_element_located(
-                    (By.ID, "expediente:j_idt90:detailSituation")
-                )
-            )
-            .text
-        )
-        details["situacion_actual"] = current_situation
+        if len(driver.find_elements(By.ID, "expediente:j_idt90:detailSituation")) > 0:
+            current_situation = driver.find_element(By.ID, "expediente:j_idt90:detailSituation").text
+            details["situacion_actual"] = current_situation
 
-        cover = (
-            WebDriverWait(driver, 10)
-            .until(
-                EC.presence_of_element_located(
-                    (By.ID, "expediente:j_idt90:detailCover")
-                )
-            )
-            .text
-        )
-        details["caratula"] = cover
+        if len(driver.find_elements(By.ID, "expediente:j_idt90:detailCover")) > 0:
+            cover = driver.find_element(By.ID, "expediente:j_idt90:detailCover").text
+            details["caratula"] = cover
 
-        file = (
-            WebDriverWait(driver, 10)
-            .until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "//label[text()='Expediente:']/following::span[1]")
-                )
-            )
-            .text
-        )
-        details["expediente"] = file
+        if len(driver.find_elements(By.XPATH, "//label[text()='Expediente:']/following::span[1]")) > 0:
+            file = driver.find_element(By.XPATH, "//label[text()='Expediente:']/following::span[1]").text
+            details["expediente"] = file
 
-        return details
+        return details  # Devolver un solo diccionario
 
     except Exception as e:
         print(f"Error al extraer detalles: {e}")
@@ -110,23 +76,24 @@ def extract_actions(driver):
     try:
         actions = []
 
-        table = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "expediente:action-table"))
-        )
-        rows = table.find_elements(By.XPATH, ".//tbody/tr")
+        if len(driver.find_elements(By.ID, "expediente:action-table")) > 0:
+            table = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, "expediente:action-table"))
+            )
+            rows = table.find_elements(By.XPATH, ".//tbody/tr")
 
-        for row in rows:
-            cells = row.find_elements(By.TAG_NAME, "td")
+            for row in rows:
+                cells = row.find_elements(By.TAG_NAME, "td")
 
-            if len(cells) >= 5:
-                office = cells[1].text.strip() if len(cells) > 1 else ""
-                date = cells[2].text.strip() if len(cells) > 2 else ""
-                type = cells[3].text.strip() if len(cells) > 3 else ""
-                detail = cells[4].text.strip() if len(cells) > 4 else ""
+                if len(cells) >= 5:
+                    office = cells[1].text.strip()
+                    date = cells[2].text.strip()
+                    type = cells[3].text.strip()
+                    detail = cells[4].text.strip()
 
-                actions.append(
-                    {"oficina": office, "fecha": date, "tipo": type, "detalle": detail}
-                )
+                    actions.append(
+                        {"oficina": office, "fecha": date, "tipo": type, "detalle": detail}
+                    )
 
         return actions
 
@@ -142,35 +109,32 @@ def extract_resources(driver):
     )
     header.click()
     try:
-        resources = []
-        table = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located(
-                (By.XPATH, "//table/thead//th[contains(text(),'Recurso')]")
-            )
-        )
-        rows = driver.find_elements(By.XPATH, ".//tbody/tr")
-
-        for row in rows:
-            cells = row.find_elements(By.TAG_NAME, "td")
-
-            if len(cells) >= 5:
-                resource = cells[0].text.strip() if len(cells) > 0 else ""
-                filing_office = cells[1].text.strip() if len(cells) > 1 else ""
-                submission_date = cells[2].text.strip() if len(cells) > 2 else ""
-                resource_type = cells[3].text.strip() if len(cells) > 3 else ""
-                current_status = cells[4].text.strip() if len(cells) > 4 else ""
-
-                resources.append(
-                    {
-                        "recurso": resource,
-                        "oficina_elevacion": filing_office,
-                        "fecha_presentacion": submission_date,
-                        "tipo_recurso": resource_type,
-                        "estado_actual": current_status,
-                    }
+        if len(driver.find_elements(By.ID, "expediente:recursosTable")) > 0:
+            resources = []
+            table = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.ID, "expediente:recursosTable")
                 )
-        return resources
-
+            )
+            rows = driver.find_elements(By.XPATH, ".//tbody/tr")
+            for row in rows:
+                cells = row.find_elements(By.TAG_NAME, "td")
+                if len(cells) >= 5:
+                    resource = cells[0].text.strip() if len(cells) > 0 else ""
+                    filing_office = cells[1].text.strip() if len(cells) > 1 else ""
+                    submission_date = cells[2].text.strip() if len(cells) > 2 else ""
+                    resource_type = cells[3].text.strip() if len(cells) > 3 else ""
+                    current_status = cells[4].text.strip() if len(cells) > 4 else ""
+                    resources.append(
+                        {
+                            "recurso": resource,
+                            "oficina_elevacion": filing_office,
+                            "fecha_presentacion": submission_date,
+                            "tipo_recurso": resource_type,
+                            "estado_actual": current_status,
+                        }
+                    )
+            return resources
     except Exception as e:
         print(f"Error al extraer recursos: {e}")
         return None
@@ -178,13 +142,17 @@ def extract_resources(driver):
 
 # Extraer el dato de los participantes
 def extract_participants(driver):
-    header = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.ID, "expediente:j_idt261:header:inactive"))
-    )
-    header.click()
     try:
+        # Hacer clic en el encabezado para expandir la sección de participantes
+        header = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "expediente:j_idt261:header:inactive"))
+        )
+        header.click()
+
         participants = []
         prosecutors = []
+
+        # Extraer datos de la tabla de participantes
         try:
             table = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.ID, "expediente:participantsTable"))
@@ -195,9 +163,10 @@ def extract_participants(driver):
                 cells = row.find_elements(By.TAG_NAME, "td")
 
                 if len(cells) >= 4:
-                    type = cells[0].text.strip() if len(cells) > 0 else ""
-                    name = cells[1].text.strip() if len(cells) > 1 else ""
-                    volume_folio = cells[2].text.strip() if len(cells) > 2 else ""
+                    # Limpieza del texto de cada celda
+                    type = cells[0].text.strip().replace("TIPO :", "") if len(cells) > 0 else ""
+                    name = cells[1].text.strip().replace("NOMBRE :", "") if len(cells) > 1 else ""
+                    volume_folio = cells[2].text.strip().replace("Tomo :", "").replace("Folio :", "") if len(cells) > 2 else ""
                     iej = cells[3].text.strip() if len(cells) > 3 else ""
 
                     participants.append(
@@ -211,32 +180,58 @@ def extract_participants(driver):
         except Exception as e:
             print(f"Error al extraer participantes: {e}")
 
+        # Extraer datos de la tabla de fiscales
         try:
-            prosecutors_table = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, "expediente:fiscalesTable"))
-            )
-            prosecutors_rows = prosecutors_table.find_elements(By.XPATH, ".//tbody/tr")
+            if len(driver.find_elements(By.ID, "expediente:fiscalesTable")) > 0:
+                prosecutors_table = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.ID, "expediente:fiscalesTable"))
+                )
+                prosecutors_rows = prosecutors_table.find_elements(By.XPATH, ".//tbody/tr")
 
-            for row in prosecutors_rows:
-                cells = row.find_elements(By.TAG_NAME, "td")
+                for row in prosecutors_rows:
+                    cells = row.find_elements(By.TAG_NAME, "td")
 
-                if len(cells) >= 3:
-                    prosecutor_office = cells[0].text.strip() if len(cells) > 0 else ""
-                    prosecutor = cells[1].text.strip() if len(cells) > 1 else ""
-                    iej = cells[2].text.strip() if len(cells) > 2 else ""
+                    if len(cells) >= 3:
+                        # Limpieza del texto de cada celda
+                        prosecutor_office = cells[0].text.strip().replace("FISCALÍA :", "") if len(cells) > 0 else ""
+                        prosecutor = cells[1].text.strip() if len(cells) > 1 else ""
+                        iej = cells[2].text.strip() if len(cells) > 2 else ""
 
-                    prosecutors.append(
-                        {
-                            "fiscalia": prosecutor_office,
-                            "fiscal": prosecutor,
-                            "iej": iej,
-                        }
-                    )
+                        prosecutors.append(
+                            {
+                                "fiscalia": prosecutor_office,
+                                "fiscal": prosecutor,
+                                "iej": iej,
+                            }
+                        )
 
         except Exception as e:
             print(f"Error al extraer fiscales: {e}")
 
+        # Devuelve los datos extraídos como un diccionario
         return {"participantes": participants, "fiscales": prosecutors}
+
     except Exception as e:
         print(f"Error general al extraer datos: {e}")
         return None
+
+def insert_resources(connection, resources, details_id):
+    """
+    Inserta recursos en la tabla `resources` vinculándolos con un `details_id`.
+    
+    :param connection: Conexión a la base de datos.
+    :param resources: Lista de recursos a insertar.
+    :param details_id: ID de la tabla `details` al cual se asocian los recursos.
+    """
+    try:
+        cursor = connection.cursor()
+        query = """
+        INSERT INTO resources (recurso, details_id)
+        VALUES (%s, %s)
+        """
+        for resource in resources:
+            values = (resource, details_id)
+            cursor.execute(query, values)
+        connection.commit()
+    except :
+        print(f"Error al insertar recursos: ")
