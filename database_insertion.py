@@ -59,7 +59,23 @@ def insert_participants(connection, participants, details_id):
     except Error as e:
         print(f"Error al insertar participantes: {e}")
 
+from datetime import datetime
+
+def clean_date(raw_date):
+    # Elimina el prefijo "Fecha:\n" y espacios innecesarios
+    clean_text = raw_date.replace("Fecha:", "").strip()
+    try:
+        # Convierte al formato 'YYYY-MM-DD'
+        parsed_date = datetime.strptime(clean_text, "%d/%m/%Y")
+        return parsed_date.strftime("%Y-%m-%d")
+    except ValueError:
+        print(f"Fecha inválida: {raw_date}")
+        return None  # O manejarlo como prefieras
+
 def insert_actions(connection, actions, details_id):
+    """
+    Inserta un conjunto de acciones en la base de datos después de limpiar y validar las fechas.
+    """
     try:
         cursor = connection.cursor()
         query = """
@@ -67,18 +83,26 @@ def insert_actions(connection, actions, details_id):
         VALUES (%s, %s, %s, %s, %s)
         """
         for action in actions:
-            values = (
-                action["oficina"],
-                action["fecha"],
-                action["tipo"],
-                action["detalle"],
-                details_id
-            )
-            cursor.execute(query, values)
+            # Limpia y valida la fecha
+            action["fecha"] = clean_date(action["fecha"])
+
+            # Verifica que la fecha sea válida antes de insertar
+            if action["fecha"]:
+                values = (
+                    action["oficina"],
+                    action["fecha"],
+                    action["tipo"],
+                    action["detalle"],
+                    details_id
+                )
+                cursor.execute(query, values)
+            else:
+                print(f"Actuación omitida por fecha inválida: {action}")
+
         connection.commit()
     except Error as e:
         print(f"Error al insertar actuaciones: {e}")
-
+        
 def insert_notes(connection, notes, details_id):
     try:
         cursor = connection.cursor()
