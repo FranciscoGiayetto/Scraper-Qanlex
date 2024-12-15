@@ -73,9 +73,6 @@ def clean_date(raw_date):
         return None  # O manejarlo como prefieras
 
 def insert_actions(connection, actions, details_id):
-    """
-    Inserta un conjunto de acciones en la base de datos después de limpiar y validar las fechas.
-    """
     try:
         cursor = connection.cursor()
         query = """
