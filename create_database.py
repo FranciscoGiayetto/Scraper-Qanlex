@@ -96,7 +96,6 @@ def create_database_and_tables():
     except Exception as e:
         print(f"Ocurrió un error inesperado: {e}")
     finally:
-        # Asegurarse de cerrar la conexión si hubo algún error o al final del proceso
         if connection:
             connection.close()
 
