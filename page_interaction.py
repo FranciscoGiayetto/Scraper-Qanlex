@@ -49,7 +49,6 @@ def click_search_button(driver):
 # Ingresar en cada expediente
 def click_buttons_in_table(driver, processed_rows):
     try:
-        # Reobtén las filas de la tabla en cada iteración
         rows = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table tr"))
         )
@@ -64,8 +63,6 @@ def click_buttons_in_table(driver, processed_rows):
                 continue
 
             try:
-
-                # Vuelve a obtener las filas para evitar referencias obsoletas
                 rows = WebDriverWait(driver, 10).until(
                     EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table tr"))
                 )
@@ -99,8 +96,6 @@ def click_buttons_in_table(driver, processed_rows):
                         )
                     )
                     back_button.click()
-
-                    # Esperar a que la tabla se recargue
                     WebDriverWait(driver, 10).until(
                         EC.presence_of_all_elements_located(
                             (By.CSS_SELECTOR, "table tr")
