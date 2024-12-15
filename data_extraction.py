@@ -64,7 +64,7 @@ def extract_details(driver):
             file = driver.find_element(By.XPATH, "//label[text()='Expediente:']/following::span[1]").text
             details["expediente"] = file
 
-        return details  # Devolver un solo diccionario
+        return details 
 
     except Exception as e:
         print(f"Error al extraer detalles: {e}")
@@ -208,7 +208,6 @@ def extract_participants(driver):
         except Exception as e:
             print(f"Error al extraer fiscales: {e}")
 
-        # Devuelve los datos extraídos como un diccionario
         return {"participantes": participants, "fiscales": prosecutors}
 
     except Exception as e:
@@ -216,13 +215,6 @@ def extract_participants(driver):
         return None
 
 def insert_resources(connection, resources, details_id):
-    """
-    Inserta recursos en la tabla `resources` vinculándolos con un `details_id`.
-    
-    :param connection: Conexión a la base de datos.
-    :param resources: Lista de recursos a insertar.
-    :param details_id: ID de la tabla `details` al cual se asocian los recursos.
-    """
     try:
         cursor = connection.cursor()
         query = """
