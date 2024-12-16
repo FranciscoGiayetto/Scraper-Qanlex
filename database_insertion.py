@@ -72,6 +72,18 @@ def clean_date(raw_date):
         print(f"Fecha inválida: {raw_date}")
         return None  # O manejarlo como prefieras
 
+import re
+
+def clean_text(text):
+    """Limpia el texto eliminando caracteres no deseados."""
+    if text:
+        # Elimina saltos de línea, espacios adicionales y caracteres no imprimibles
+        text = text.strip()
+        text = re.sub(r'[\n\r\t]+', ' ', text)  # Reemplaza saltos de línea y tabs por un solo espacio
+        text = re.sub(r'\s{2,}', ' ', text)     # Reemplaza múltiples espacios por uno solo
+        return text
+    return ""
+
 def insert_actions(connection, actions, details_id):
     try:
         cursor = connection.cursor()
@@ -80,6 +92,12 @@ def insert_actions(connection, actions, details_id):
         VALUES (%s, %s, %s, %s, %s)
         """
         for action in actions:
+            # Limpieza de los campos de la acción antes de la inserción
+            action["oficina"] = clean_text(action["oficina"]).replace("Oficina:", "") if action.get("oficina") else ""
+            action["fecha"] = clean_text(action["fecha"]).replace("Fecha:", "") if action.get("fecha") else ""
+            action["tipo"] = clean_text(action["tipo"]).replace("Tipo actuacion:", "") if action.get("tipo") else ""
+            action["detalle"] = clean_text(action["detalle"]).replace("Detalle:", "") if action.get("detalle") else ""
+
             # Limpia y valida la fecha
             action["fecha"] = clean_date(action["fecha"])
 
@@ -99,6 +117,7 @@ def insert_actions(connection, actions, details_id):
         connection.commit()
     except Error as e:
         print(f"Error al insertar actuaciones: {e}")
+
         
 def insert_notes(connection, notes, details_id):
     try:
