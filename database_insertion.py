@@ -127,13 +127,26 @@ def insert_notes(connection, notes, details_id):
         VALUES (%s, %s, %s, %s)
         """
         for note in notes:
-            values = (
-                note["fecha"],
-                note["interviniente"],
-                note["descripcion"],
-                details_id
-            )
-            cursor.execute(query, values)
+            # Limpieza de los campos de la nota antes de la inserción
+            note["fecha"] = clean_text(note["fecha"]).replace("Fecha:", "") if note.get("fecha") else ""
+            note["interviniente"] = clean_text(note["interviniente"]).replace("Interviniente:", "") if note.get("interviniente") else ""
+            note["descripcion"] = clean_text(note["descripcion"]).replace("Descripción:", "") if note.get("descripcion") else ""
+
+            # Limpia y valida la fecha
+            note["fecha"] = clean_date(note["fecha"])
+
+            # Verifica que la fecha sea válida antes de insertar
+            if note["fecha"]:
+                values = (
+                    note["fecha"],
+                    note["interviniente"],
+                    note["descripcion"],
+                    details_id
+                )
+                cursor.execute(query, values)
+            else:
+                print(f"Nota omitida por fecha inválida: {note}")
+
         connection.commit()
     except Error as e:
         print(f"Error al insertar notas: {e}")

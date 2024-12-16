@@ -77,8 +77,8 @@ def click_buttons_in_table(driver, processed_rows):
                     button.click()
 
                     # Extracción de datos
-                    notes = extract_notes(driver)
                     actions = extract_actions(driver)
+                    notes = extract_notes(driver)
                     details = extract_details(driver)
                     participants = extract_participants(driver)
                     resources = extract_resources(driver)
@@ -87,7 +87,10 @@ def click_buttons_in_table(driver, processed_rows):
                     details_id = insert_details(connection, details)
                     insert_participants(connection, participants, details_id)
                     insert_actions(connection, actions, details_id)
-                    # insert_notes(connection, notes, details_id)
+
+                    if notes != None:
+                        insert_notes(connection, notes, details_id)
+                    
                     
                     # Volver a la tabla
                     back_button = WebDriverWait(driver, 10).until(

@@ -2,27 +2,32 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# saque la fecha
+
 # Extraer datos de las notas
 def extract_notes(driver):
     try:
         notes = []
-        if len(driver.find_elements(By.ID, "expediente:tableNotas")) > 0:
+        
+        # Verificar si la tabla de notas está presente
+        if len(driver.find_elements(By.ID, "expediente:notas-table")) > 0:
+            print('La tabla existe')
             table = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(
-                    (By.ID, "expediente:tableNotas")
-                )
+                EC.presence_of_element_located((By.ID, "expediente:notas-table"))
             )
-            rows = driver.find_elements(By.XPATH, ".//tbody/tr")
+            
+            # Obtener todas las filas de la tabla
+            rows = table.find_elements(By.XPATH, ".//tbody/tr")
 
             for row in rows:
                 cells = row.find_elements(By.TAG_NAME, "td")
 
                 if len(cells) >= 3:
-                    #fecha = cells[0].text.strip() if len(cells) > 0 else ""
+                    # Extraer los datos de cada celda
+                    fecha = cells[0].text.strip() if len(cells) > 0 else ""
                     interviniente = cells[1].text.strip() if len(cells) > 1 else ""
                     descripcion = cells[2].text.strip() if len(cells) > 2 else ""
-                    fecha = cells[0].text.strip() if len(cells) > 0 else ""
+                    
+                    # Agregar la nota a la lista
                     notes.append(
                         {
                             "fecha": fecha,
