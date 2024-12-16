@@ -10,7 +10,6 @@ def extract_notes(driver):
         
         # Verificar si la tabla de notas está presente
         if len(driver.find_elements(By.ID, "expediente:notas-table")) > 0:
-            print('La tabla existe')
             table = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.ID, "expediente:notas-table"))
             )
@@ -38,7 +37,6 @@ def extract_notes(driver):
 
             return notes
         else:
-            print('No hay notas')
             return []
 
     except Exception as e:
@@ -140,6 +138,8 @@ def extract_resources(driver):
                         }
                     )
             return resources
+        else:
+            return []
     except Exception as e:
         print(f"Error al extraer recursos: {e}")
         return None
@@ -219,16 +219,4 @@ def extract_participants(driver):
         print(f"Error general al extraer datos: {e}")
         return None
 
-def insert_resources(connection, resources, details_id):
-    try:
-        cursor = connection.cursor()
-        query = """
-        INSERT INTO resources (recurso, details_id)
-        VALUES (%s, %s)
-        """
-        for resource in resources:
-            values = (resource, details_id)
-            cursor.execute(query, values)
-        connection.commit()
-    except :
-        print(f"Error al insertar recursos: ")
+

@@ -180,3 +180,38 @@ def extract_and_store_data(driver):
     finally:
         connection.close()
 
+def insert_resources(connection, resources, details_id):
+    try:
+        cursor = connection.cursor()
+        query = """
+        INSERT INTO resources (recurso, oficina_elevacion, fecha_presentacion, tipo_recurso, estado_actual, details_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        for resource in resources:
+            # Limpieza de los campos del recurso antes de la inserción
+            resource["recurso"] = clean_text(resource["recurso"]).replace("Recurso:", "") if resource.get("recurso") else ""
+            resource["oficina_elevacion"] = clean_text(resource["oficina_elevacion"]).replace("Oficina de elevación:", "") if resource.get("oficina_elevacion") else ""
+            resource["fecha_presentacion"] = clean_text(resource["fecha_presentacion"]).replace("Fecha de presentación:", "") if resource.get("fecha_presentacion") else ""
+            resource["tipo_recurso"] = clean_text(resource["tipo_recurso"]).replace("Tipo de recurso:", "") if resource.get("tipo_recurso") else ""
+            resource["estado_actual"] = clean_text(resource["estado_actual"]).replace("Estado actual:", "") if resource.get("estado_actual") else ""
+
+            # Limpia y valida la fecha de presentación
+            resource["fecha_presentacion"] = clean_date(resource["fecha_presentacion"])
+
+            # Verifica que la fecha sea válida antes de insertar
+            if resource["fecha_presentacion"]:
+                values = (
+                    resource["recurso"],
+                    resource["oficina_elevacion"],
+                    resource["fecha_presentacion"],
+                    resource["tipo_recurso"],
+                    resource["estado_actual"],
+                    details_id
+                )
+                cursor.execute(query, values)
+            else:
+                print(f"Recurso omitido por fecha inválida: {resource}")
+
+        connection.commit()
+    except Error as e:
+        print(f"Error al insertar recursos: {e}")

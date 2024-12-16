@@ -75,11 +75,16 @@ def create_database_and_tables():
 
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS resources (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    recurso TEXT,
-                    details_id INT,
-                    FOREIGN KEY (details_id) REFERENCES details(id) ON DELETE CASCADE
-                );
+                id INT AUTO_INCREMENT PRIMARY KEY,          
+                recurso TEXT,                               
+                oficina_elevacion TEXT,                     
+                fecha_presentacion DATE,                    
+                tipo_recurso TEXT,                          
+                estado_actual TEXT,                         
+                details_id INT,                            
+                FOREIGN KEY (details_id) REFERENCES details(id) ON DELETE CASCADE 
+            );
+
             """)
 
             # Confirmar los cambios

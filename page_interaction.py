@@ -90,7 +90,9 @@ def click_buttons_in_table(driver, processed_rows):
 
                     if notes != None:
                         insert_notes(connection, notes, details_id)
-                    
+                    print(resources)
+                    if resources != None:
+                        insert_resources(connection, resources, details_id)
                     
                     # Volver a la tabla
                     back_button = WebDriverWait(driver, 10).until(
