@@ -95,7 +95,4 @@ def create_database_and_tables():
             print(f"Error MySQL: {err}")
     except Exception as e:
         print(f"Ocurrió un error inesperado: {e}")
-    finally:
-        if connection:
-            connection.close()
 
