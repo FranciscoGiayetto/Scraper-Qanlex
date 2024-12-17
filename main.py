@@ -24,7 +24,7 @@ def open_page():
         if not more_rows_to_process:
             processed_rows = set()
             if not go_to_next_page(driver):
-                print("No hay más páginas para procesar. Terminando el script.")
+                print("No hay más páginas disponibles.")
                 end = False
     driver.quit()
 

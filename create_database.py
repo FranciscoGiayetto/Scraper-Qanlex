@@ -89,7 +89,7 @@ def create_database_and_tables():
 
             # Confirmar los cambios
             connection.commit()
-            print("Las tablas se han creado (si no existían).")
+
 
     except MySQLError as err:
         if err.args[0] == 1045:

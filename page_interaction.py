@@ -5,6 +5,7 @@ from data_extraction import *
 from database_insertion import *
 import pymysql
 from config import DATABASE_CONFIG
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 # Función para cambiar a "Por parte"
@@ -90,7 +91,6 @@ def click_buttons_in_table(driver, processed_rows):
 
                     if notes != None:
                         insert_notes(connection, notes, details_id)
-                    print(resources)
                     if resources != None:
                         insert_resources(connection, resources, details_id)
                     
@@ -110,7 +110,8 @@ def click_buttons_in_table(driver, processed_rows):
                     processed_rows.add(row_index)
                 else:
                     processed_rows.add(row_index)
-
+            except StaleElementReferenceException as e:
+                continue
             except Exception as e:
                 print(f"Error en la fila {row_index + 1}: {e}")
                 continue
@@ -128,11 +129,11 @@ def go_to_next_page(driver):
         next_page_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "j_idt118:j_idt208:j_idt215"))
         )
+
         next_page_button.click()
         WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table tr"))
         )
         return True
     except Exception as e:
-        print(f"Error al intentar ir a la siguiente página: {e}")
         return False

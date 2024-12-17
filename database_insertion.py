@@ -5,18 +5,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from data_extraction import *
 
-def connect_to_db():
-    try:
-        connection = mysql.connector.connect(
-            host="localhost",
-            user="tu_usuario",
-            password="tu_contraseña",
-            database="expedientes"
-        )
-        return connection
-    except Error as e:
-        print(f"Error al conectar con MySQL: {e}")
-        return None
 
 def insert_details(connection, details):
     try:
@@ -62,25 +50,21 @@ def insert_participants(connection, participants, details_id):
 from datetime import datetime
 
 def clean_date(raw_date):
-    # Elimina el prefijo "Fecha:\n" y espacios innecesarios
     clean_text = raw_date.replace("Fecha:", "").strip()
     try:
-        # Convierte al formato 'YYYY-MM-DD'
         parsed_date = datetime.strptime(clean_text, "%d/%m/%Y")
         return parsed_date.strftime("%Y-%m-%d")
     except ValueError:
         print(f"Fecha inválida: {raw_date}")
-        return None  # O manejarlo como prefieras
+        return None 
 
 import re
 
 def clean_text(text):
-    """Limpia el texto eliminando caracteres no deseados."""
     if text:
-        # Elimina saltos de línea, espacios adicionales y caracteres no imprimibles
         text = text.strip()
-        text = re.sub(r'[\n\r\t]+', ' ', text)  # Reemplaza saltos de línea y tabs por un solo espacio
-        text = re.sub(r'\s{2,}', ' ', text)     # Reemplaza múltiples espacios por uno solo
+        text = re.sub(r'[\n\r\t]+', ' ', text)  
+        text = re.sub(r'\s{2,}', ' ', text)     
         return text
     return ""
 
@@ -92,16 +76,13 @@ def insert_actions(connection, actions, details_id):
         VALUES (%s, %s, %s, %s, %s)
         """
         for action in actions:
-            # Limpieza de los campos de la acción antes de la inserción
             action["oficina"] = clean_text(action["oficina"]).replace("Oficina:", "") if action.get("oficina") else ""
             action["fecha"] = clean_text(action["fecha"]).replace("Fecha:", "") if action.get("fecha") else ""
             action["tipo"] = clean_text(action["tipo"]).replace("Tipo actuacion:", "") if action.get("tipo") else ""
             action["detalle"] = clean_text(action["detalle"]).replace("Detalle:", "") if action.get("detalle") else ""
 
-            # Limpia y valida la fecha
             action["fecha"] = clean_date(action["fecha"])
 
-            # Verifica que la fecha sea válida antes de insertar
             if action["fecha"]:
                 values = (
                     action["oficina"],
@@ -111,8 +92,6 @@ def insert_actions(connection, actions, details_id):
                     details_id
                 )
                 cursor.execute(query, values)
-            else:
-                print(f"Actuación omitida por fecha inválida: {action}")
 
         connection.commit()
     except Error as e:
@@ -127,15 +106,12 @@ def insert_notes(connection, notes, details_id):
         VALUES (%s, %s, %s, %s)
         """
         for note in notes:
-            # Limpieza de los campos de la nota antes de la inserción
             note["fecha"] = clean_text(note["fecha"]).replace("Fecha:", "") if note.get("fecha") else ""
             note["interviniente"] = clean_text(note["interviniente"]).replace("Interviniente:", "") if note.get("interviniente") else ""
             note["descripcion"] = clean_text(note["descripcion"]).replace("Descripción:", "") if note.get("descripcion") else ""
 
-            # Limpia y valida la fecha
             note["fecha"] = clean_date(note["fecha"])
 
-            # Verifica que la fecha sea válida antes de insertar
             if note["fecha"]:
                 values = (
                     note["fecha"],
@@ -144,41 +120,11 @@ def insert_notes(connection, notes, details_id):
                     details_id
                 )
                 cursor.execute(query, values)
-            else:
-                print(f"Nota omitida por fecha inválida: {note}")
 
         connection.commit()
     except Error as e:
         print(f"Error al insertar notas: {e}")
 
-def extract_and_store_data(driver):
-    connection = connect_to_db()
-    if connection is None:
-        return
-
-    try:
-        # Extraer detalles
-        details = extract_details(driver)
-        details_id = insert_details(connection, details)
-
-        if details_id is None:
-            return
-
-        # Extraer participantes
-        participants = extract_participants(driver)
-        insert_participants(connection, participants, details_id)
-
-        # Extraer actuaciones
-        actions = extract_actions(driver)
-        insert_actions(connection, actions, details_id)
-
-        # Extraer notas
-        notes = extract_notes(driver)
-        insert_notes(connection, notes, details_id)
-
-        print("Datos almacenados correctamente.")
-    finally:
-        connection.close()
 
 def insert_resources(connection, resources, details_id):
     try:
@@ -188,17 +134,14 @@ def insert_resources(connection, resources, details_id):
         VALUES (%s, %s, %s, %s, %s, %s)
         """
         for resource in resources:
-            # Limpieza de los campos del recurso antes de la inserción
             resource["recurso"] = clean_text(resource["recurso"]).replace("Recurso:", "") if resource.get("recurso") else ""
             resource["oficina_elevacion"] = clean_text(resource["oficina_elevacion"]).replace("Oficina de elevación:", "") if resource.get("oficina_elevacion") else ""
             resource["fecha_presentacion"] = clean_text(resource["fecha_presentacion"]).replace("Fecha de presentación:", "") if resource.get("fecha_presentacion") else ""
             resource["tipo_recurso"] = clean_text(resource["tipo_recurso"]).replace("Tipo de recurso:", "") if resource.get("tipo_recurso") else ""
             resource["estado_actual"] = clean_text(resource["estado_actual"]).replace("Estado actual:", "") if resource.get("estado_actual") else ""
 
-            # Limpia y valida la fecha de presentación
             resource["fecha_presentacion"] = clean_date(resource["fecha_presentacion"])
 
-            # Verifica que la fecha sea válida antes de insertar
             if resource["fecha_presentacion"]:
                 values = (
                     resource["recurso"],
@@ -209,8 +152,6 @@ def insert_resources(connection, resources, details_id):
                     details_id
                 )
                 cursor.execute(query, values)
-            else:
-                print(f"Recurso omitido por fecha inválida: {resource}")
 
         connection.commit()
     except Error as e:
