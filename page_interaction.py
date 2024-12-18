@@ -92,6 +92,7 @@ def click_buttons_in_table(driver, processed_rows):
                     if notes != None:
                         insert_notes(connection, notes, details_id)
                     if resources != None:
+                        print(resources)
                         insert_resources(connection, resources, details_id)
                     
                     # Volver a la tabla
@@ -111,6 +112,7 @@ def click_buttons_in_table(driver, processed_rows):
                 else:
                     processed_rows.add(row_index)
             except StaleElementReferenceException as e:
+                print(f"Error en la fila {row_index + 1}: {e}")
                 continue
             except Exception as e:
                 print(f"Error en la fila {row_index + 1}: {e}")

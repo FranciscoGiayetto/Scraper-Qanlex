@@ -76,9 +76,8 @@ def extract_details(driver):
 
 # Extraer datos de actuaciones
 def extract_actions(driver):
+    actions = []
     try:
-        actions = []
-
         if len(driver.find_elements(By.ID, "expediente:action-table")) > 0:
             table = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.ID, "expediente:action-table"))
@@ -97,7 +96,6 @@ def extract_actions(driver):
                     actions.append(
                         {"oficina": office, "fecha": date, "tipo": type, "detalle": detail}
                     )
-
         return actions
 
     except Exception as e:
@@ -138,8 +136,8 @@ def extract_resources(driver):
                         }
                     )
             return resources
-        else:
-            return []
+        # else:
+        #     return []
     except Exception as e:
         print(f"Error al extraer recursos: {e}")
         return None
