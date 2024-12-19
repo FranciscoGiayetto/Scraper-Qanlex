@@ -2,9 +2,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
-# Extraer datos de las notas
 def extract_notes(driver):
+    """
+    Extrae los datos de las notas de la página actual.
+
+    Verifica si la tabla de notas está presente y extrae la fecha, el interviniente y 
+    la descripción de cada fila en la tabla.
+
+    Args:
+        driver: El controlador de Selenium que interactúa con la página.
+
+    Returns:
+        list: Una lista de diccionarios con los datos extraídos (fecha, interviniente, descripcion),
+              o una lista vacía si no se encuentran notas.
+    """
     try:
         notes = []
         
@@ -44,6 +55,17 @@ def extract_notes(driver):
         return None
 
 def extract_details(driver):
+    """
+    Extrae los detalles del expediente (dependencia, jurisdicción, situación actual, carátula y expediente).
+
+    Verifica si los elementos correspondientes están presentes y extrae los datos.
+
+    Args:
+        driver: El controlador de Selenium que interactúa con la página.
+
+    Returns:
+        dict: Un diccionario con los detalles extraídos del expediente.
+    """
     try:
         details = {}
 
@@ -73,9 +95,20 @@ def extract_details(driver):
         print(f"Error al extraer detalles: {e}")
         return None
 
-
-# Extraer datos de actuaciones
 def extract_actions(driver):
+    """
+    Extrae los datos de las actuaciones asociadas al expediente.
+
+    Verifica si la tabla de actuaciones está presente, luego extrae la oficina, fecha, 
+    tipo y detalle de cada actuación en la tabla.
+
+    Args:
+        driver: El controlador de Selenium que interactúa con la página.
+
+    Returns:
+        list: Una lista de diccionarios con los datos extraídos (oficina, fecha, tipo, detalle) 
+              de las actuaciones, o una lista vacía si no se encuentran actuaciones.
+    """
     actions = []
     try:
         if len(driver.find_elements(By.ID, "expediente:action-table")) > 0:
@@ -96,15 +129,27 @@ def extract_actions(driver):
                     actions.append(
                         {"oficina": office, "fecha": date, "tipo": type, "detalle": detail}
                     )
+
         return actions
 
     except Exception as e:
         print(f"Error al extraer actuaciones: {e}")
         return None
 
-
-# Extraer datos de los recursos
 def extract_resources(driver):
+    """
+    Extrae los datos de los recursos asociados al expediente.
+
+    Primero, se hace clic en el encabezado para expandir la sección de recursos, y luego se extraen 
+    los datos de la tabla (recurso, oficina de elevación, fecha de presentación, tipo de recurso, estado).
+
+    Args:
+        driver: El controlador de Selenium que interactúa con la página.
+
+    Returns:
+        list: Una lista de diccionarios con los datos extraídos (recurso, oficina de elevación, 
+              fecha de presentación, tipo de recurso, estado actual), o una lista vacía si no se encuentran recursos.
+    """
     header = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.ID, "expediente:j_idt371:header:inactive"))
     )
@@ -136,15 +181,23 @@ def extract_resources(driver):
                         }
                     )
             return resources
-        # else:
-        #     return []
     except Exception as e:
         print(f"Error al extraer recursos: {e}")
         return None
 
-
-# Extraer el dato de los participantes
 def extract_participants(driver):
+    """
+    Extrae los datos de los participantes y fiscales asociados al expediente.
+
+    Hace clic en el encabezado para expandir la sección de participantes, luego extrae los datos de 
+    las tablas de participantes y fiscales, como tipo, nombre, tomo/folio, iej, fiscalía y fiscal.
+
+    Args:
+        driver: El controlador de Selenium que interactúa con la página.
+
+    Returns:
+        dict: Un diccionario con las listas de participantes y fiscales extraídos.
+    """
     try:
         # Hacer clic en el encabezado para expandir la sección de participantes
         header = WebDriverWait(driver, 10).until(
@@ -216,5 +269,3 @@ def extract_participants(driver):
     except Exception as e:
         print(f"Error general al extraer datos: {e}")
         return None
-
-
